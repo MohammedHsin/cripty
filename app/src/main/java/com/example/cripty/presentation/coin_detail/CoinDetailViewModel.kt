@@ -1,12 +1,15 @@
 package com.example.cripty.presentation.coin_detail
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.cripty.common.Resource
 import com.example.cripty.domain.use_case.get_coin.GetCoinByIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
@@ -28,6 +31,7 @@ class CoinDetailViewModel @Inject constructor(
 
     private fun getCoinById(coinId: String) {
         getCoinByIdUseCase(coinId).onEach { result ->
+
             when (result) {
                 is Resource.Error -> {
                     _state.value = CoinDetailState(error = result.message ?: "Error")
@@ -36,13 +40,15 @@ class CoinDetailViewModel @Inject constructor(
 
                 is Resource.Loading -> {
                     _state.value = CoinDetailState(isLoading = true)
+
+
                 }
 
                 is Resource.Success -> {
                     _state.value = CoinDetailState(coin = result.data)
                 }
             }
-        }
+        }.launchIn(viewModelScope)
     }
 
 }

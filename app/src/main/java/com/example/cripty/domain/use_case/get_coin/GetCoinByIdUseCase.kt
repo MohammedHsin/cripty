@@ -1,5 +1,6 @@
 package com.example.cripty.domain.use_case.get_coin
 
+import android.util.Log
 import com.example.cripty.common.Resource
 import com.example.cripty.data.remote.dto.CoinDetailDto
 import com.example.cripty.data.remote.dto.CoinDto
@@ -17,15 +18,17 @@ import javax.inject.Inject
 class GetCoinByIdUseCase @Inject constructor(
     private val coinRepository: CoinRepository
 ){
-    operator fun invoke(coinId : String) : Flow<Resource<CoinDetail>> = flow {
+    operator fun invoke(coinId : String) : Flow<Resource<CoinDetail>> {
+        return flow {
         try {
-            emit(Resource.Loading())
+            emit(Resource.Loading<CoinDetail>())
             val coin = coinRepository.getCoinById(coinId).toCoinDetail()
-            emit(Resource.Success(coin))
+            emit(Resource.Success<CoinDetail>(coin))
         }catch (e : HttpException){
-            emit(Resource.Error(e.localizedMessage ?: "An unexpected error occurred"))
+            emit(Resource.Error<CoinDetail>(e.localizedMessage ?: "An unexpected error occurred"))
         }catch (e : IOException){
-            emit(Resource.Error("Couldn't reach server. Check your internet connection"))
+            emit(Resource.Error<CoinDetail>("Couldn't reach server. Check your internet connection"))
     }
     }
+}
 }
